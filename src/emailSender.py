@@ -1,12 +1,16 @@
-import yagmail
+import smtplib
 
-emailAddress = input("Please input your email address: ")
-password = input("Please input your password: ")
-body = "Hello there from Yagmail"
+def sendEmail(emailAddress, password):
 
-yag = yagmail.SMTP(emailAddress, password)
-yag.send(
-    to=emailAddress,
-    subject="Yagmail test with attachment",
-    contents=body, 
-)
+    subject = "Skinport market has updated"
+    message = "Hello. The skinport market has updated. Have a nice day"
+
+    text = f"Subject: {subject}\n\n{message}"
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+
+    server.login(emailAddress, password)
+
+    server.sendmail(emailAddress, emailAddress, text)
+
+    print("Verify email has been sent")
