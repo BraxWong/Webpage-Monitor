@@ -1,55 +1,26 @@
-
-#   ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-#   ┃                                                                         ┃
-#   ┃             The following code is created by geeksforgeeks.             ┃
-#   ┃                            Please check out                             ┃
-#   ┃ https://www.geeksforgeeks.org/python-script-to-monitor-website-changes/ ┃
-#   ┃                                                                         ┃
-#   ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
-
-import time 
-import hashlib 
+import requests
 import emailSender
-import ssl
-
-from urllib.request import urlopen, Request 
-  
-url = Request('https://skinport.com/tf2/market?quality=12&sort=date&order=desc',
-              headers={'User-Agent': 'Mozilla/5.0'})
+from bs4 import BeautifulSoup
   
 emailAddress = input("Please input your email address: ")
 password = input("Please input your password: ")
 
-response = urlopen(url, context=ssl._create_unverified_context()).read()
-  
-currentHash = hashlib.sha224(response).hexdigest() 
-time.sleep(10) 
-while True: 
-    try: 
-        response = urlopen(url).read() 
-  
-        currentHash = hashlib.sha224(response).hexdigest() 
-  
-        time.sleep(300) 
-  
-        response = urlopen(url).read() 
-  
-        newHash = hashlib.sha224(response).hexdigest() 
-  
-        if newHash == currentHash: 
-            print("No Change")
-            continue
-  
+while True:
+    try:
+        r = requests.get('https://skinport.com/tf2/market?quality=12&sort=date&order=desc', timeout=5, allow_redirects=True)
+        if r.status_code != 200:
+            print("Error retrieving from the website. Terminating")
+            exit()
         else:
-            print("CHANGE!!!!")
-            response = urlopen(url).read() 
-  
-            currentHash = hashlib.sha224(response).hexdigest() 
-  
-            emailSender.sendEmail(emailAddress, password)           
+            print(f"Final URL: {r.url}")
+            soup = BeautifulSoup(r.text, 'lxml')
+            items = soup.find_all('div', class_ = 'CatalogPage-item CatalogPage-item--grid')
+            print(items)
+            emailSender.sendEmail(emailAddress, password)
+    except Exception as e:
+        print("Error retrieving from the website. Terminating")
+        exit()
 
-            time.sleep(300) 
-            continue
-  
-    except Exception as e: 
-        print("error") 
+
+
+
