@@ -1,31 +1,40 @@
 import emailSender
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 import time
 import json
 
-def checkIfItemMatch(itemList, priceList, discountList):
+def checkIfItemMatch(itemList, priceList):
     with open("database.json", "r+", encoding='utf-8') as file:
+        print("Opening the file")
         file_data = json.load(file)
         index = 0
+        fileWiped = False
+
         for item in file_data["items"]:
+            print(item["item name"], itemList[index])
             if item["item name"] != itemList[index]:
-                print("Could not find the item")
+                print("New item spotted. Clearing the database")
                 if index==0:
-                    print("Index is 0 ... Clearing the database")
-                    item["items"].clear()
-                else:
-                    #TODO: Check if the percentage is over 25%. If so, send an email
-                    print("Adding item to the database")
-                    item["items"].append({"item name": itemList[index] , 
-                                          "price": priceList[index],
-                                          "discount": discountList[index]
-                                          })
-            print(itemList[index], priceList[index])
-            index+=1
+                    file_data["items"].clear()
+                    json.dump(file_data, file, indent = 2, ensure_ascii=False)
+                    file.seek(0)
+                    fileWiped = True
+                    break
+            index +=1
+
+        if fileWiped:
+            print("Adding item to the database")
+            for index in range(len(itemList)):
+                file_data["items"].append({"item name": itemList[index] , 
+                                            "price": priceList[index]
+                                        })
+            file.seek(0)
+            json.dump(file_data, file, indent = 2, ensure_ascii=False)
+
+        file.truncate()
+        file.close()
 
 
 
@@ -38,6 +47,7 @@ options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
+options.binary_location = r"chromedriver" 
 options.headless = True
 url = 'https://skinport.com/tf2/market?quality=12&sort=date&order=desc'
 driver = webdriver.Chrome(options=options)
@@ -48,33 +58,21 @@ stealth(driver,
             webgl_vendor="Intel Inc.",
             renderer="Intel Iris OpenGL Engine",
             fix_hairline=True,
+            un_on_insecure_origins= False,
             )
 try:
     driver.get(url)
     #Wait 30 seconds for the browser to load before getting info
-    time.sleep(30)
+    time.sleep(10)
     items = driver.find_elements(By.CLASS_NAME, 'ItemPreview-commonInfo')
-    print("Found itemPreview")
-    itemList, priceList, discountList=[],[],[]
+    itemList, priceList=[],[]
     for item in items:
         itemName = item.find_element(By.CLASS_NAME, 'ItemPreview-itemName').text
-        print("Found itemName")
         itemPrice = item.find_element(By.CLASS_NAME, 'Tooltip-link').text
-        print("Found itemPrice")
-        itemDiscount = item.find_element(By.CLASS_NAME, 'GradientLabel ItemPreview-discount')
-        print("Find item discount")
-        if itemDiscount.is_displayed():
-            itemDiscount = item.find_elements(By.CLASS_NAME, 'GradientLabel ItemPreview-discount')
-            print("Found item discount")
-            for discount in itemDiscount: 
-                percentage = discount.find_element(By.TAG_NAME, 'span').text
-                print("Found the real discount")
-                discountList.append(percentage)
-        else:
-            discountList.append('- 0%')
         itemList.append(itemName)
         priceList.append(itemPrice)
-    checkIfItemMatch(itemList, priceList, discountList)
+    print("Going into checkIfItemMatch()")
+    checkIfItemMatch(itemList, priceList)
     while True:
         continue
 except:
