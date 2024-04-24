@@ -5,7 +5,7 @@ from selenium_stealth import stealth
 import time
 import json
 
-def checkIfItemMatch(itemList, priceList):
+def checkIfItemMatch(itemList, priceList, emailAddress, password):
     with open("database.json", "r+", encoding='utf-8') as file:
         print("Opening the file")
         file_data = json.load(file)
@@ -13,33 +13,36 @@ def checkIfItemMatch(itemList, priceList):
         fileWiped = False
 
         for item in file_data["items"]:
-            print(item["item name"], itemList[index])
             if item["item name"] != itemList[index]:
                 print("New item spotted. Clearing the database")
                 if index==0:
                     file_data["items"].clear()
-                    json.dump(file_data, file, indent = 2, ensure_ascii=False)
                     file.seek(0)
+                    file.truncate()
+                    json.dump(file_data, file, indent = 2, ensure_ascii=False)
                     fileWiped = True
                     break
             index +=1
 
         if fileWiped:
+            itemString = ""
             print("Adding item to the database")
             for index in range(len(itemList)):
                 file_data["items"].append({"item name": itemList[index] , 
                                             "price": priceList[index]
                                         })
+                itemString+=itemList[index] + " : " + priceList[index] + "\n" 
             file.seek(0)
             json.dump(file_data, file, indent = 2, ensure_ascii=False)
-
+            emailSender.sendEmail(emailAddress, password, "New item on skinport!!!", itemString)
+            
         file.truncate()
         file.close()
 
 
 
-# emailAddress = input("Please input your email address: ")
-# password = input("Please input your password: ")
+emailAddress = input("Please input your email address: ")
+password = input("Please input your password: ")
 
 
 options = webdriver.ChromeOptions()
@@ -59,8 +62,9 @@ stealth(driver,
         webgl_vendor="Intel Inc.",
         renderer="Intel Iris OpenGL Engine",
         fix_hairline=True,
-        un_on_insecure_origins= False,
+        run_on_insecure_origins= False
         )
+
 while True:
     try:
         driver.get(url)
@@ -74,12 +78,11 @@ while True:
             itemList.append(itemName)
             priceList.append(itemPrice)
         print("Going into checkIfItemMatch()")
-        checkIfItemMatch(itemList, priceList)
-        while True:
-            continue
+        checkIfItemMatch(itemList, priceList, emailAddress, password)
+        print("bout to go to sleep")
+        time.sleep(60)
     except:
-        print("Something went wrong")
-        # emailSender.sendEmail(emailAddress, password, "Warning!! Monitor Has Been Terminated", "An error has taken place and the program has terminated. Please reboot as soon as possible") 
-
+        # emailSender.sendEmail(emailAddress, password, "Warning!! Monitor Has Been Terminated", "An error has taken place and the program has terminated. Please reboot as soon as possible")
+        break
 
 
