@@ -11,10 +11,11 @@ def checkIfItemMatch(itemList, priceList, emailAddress, password):
         file_data = json.load(file)
         index = 0
         fileWiped = False
-
+        itemString = ""
         for item in file_data["items"]:
             if item["item name"] != itemList[index]:
                 print("New item spotted. Clearing the database")
+                itemString = itemList[index] + " " + str(priceList[index])
                 if index==0:
                     file_data["items"].clear()
                     file.seek(0)
@@ -25,13 +26,11 @@ def checkIfItemMatch(itemList, priceList, emailAddress, password):
             index +=1
 
         if fileWiped:
-            itemString = ""
             print("Adding item to the database")
             for index in range(len(itemList)):
                 file_data["items"].append({"item name": itemList[index] , 
                                             "price": priceList[index]
                                         })
-                itemString+=itemList[index] + " : " + priceList[index] + "\n" 
             file.seek(0)
             json.dump(file_data, file, indent = 2, ensure_ascii=False)
             emailSender.sendEmail(emailAddress, password, "New item on skinport!!!", itemString)

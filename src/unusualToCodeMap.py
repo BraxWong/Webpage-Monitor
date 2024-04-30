@@ -402,5 +402,8 @@ class UnusualToCodeMode:
             "Arctic Delight": 3141,
             "Winning Spirit": 3142,
             "Petal Prance": 3143,
-            ""
+            "Energy Orb": 704,
+            "Cool": 703,
+            "Isotope": 702,
+            "Hot": 701
         }

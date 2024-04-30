@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium_stealth import stealth
 import time
+from unusualToCodeMap import UnusualToCodeMode
 
 def getLink(itemName, particle):
     itemNameList = itemName.strip().split(" ")
@@ -12,6 +13,13 @@ def getLink(itemName, particle):
             itemName += "%20"
 
     return f'https://next.backpack.tf/classifieds?itemName={itemName}&quality=5&particle={particle}'
+
+def getUnusualIndex(itemName):
+    unusualMap = UnusualToCodeMode()
+    for key, value in unusualMap.map.keys():
+        if key in itemName:
+            return [key,value]
+    return []
 
 def getItemPrice(item_name, particle):
     options = webdriver.ChromeOptions()
@@ -46,7 +54,6 @@ def getItemPrice(item_name, particle):
                 itemList.append(itemName)
                 priceList.append(itemPrice)
             print("Going into checkIfItemMatch()")
-            checkIfItemMatch(itemList, priceList)
             while True:
                 continue
         except:
