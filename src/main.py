@@ -1,4 +1,5 @@
 import emailSender
+import backpacktf
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium_stealth import stealth
@@ -38,8 +39,6 @@ def checkIfItemMatch(itemList, priceList, emailAddress, password):
         file.truncate()
         file.close()
 
-
-
 emailAddress = input("Please input your email address: ")
 password = input("Please input your password: ")
 
@@ -50,7 +49,7 @@ options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
-options.binary_location = r"chromedriver" 
+options.binary_location = r"chromedriver"
 options.headless = True
 url = 'https://skinport.com/tf2/market?quality=12&sort=date&order=desc'
 driver = webdriver.Chrome(options=options)

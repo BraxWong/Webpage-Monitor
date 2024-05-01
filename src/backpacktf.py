@@ -8,17 +8,20 @@ def getLink(itemName, particle):
     itemNameList = itemName.strip().split(" ")
     itemName = ""
     for i in range(len(itemNameList)):
-        itemName += itemName[i]
-        if i != len(itemName) - 1:
+        itemName += itemNameList[i]
+        if i != len(itemNameList) - 1:
             itemName += "%20"
-
-    return f'https://next.backpack.tf/classifieds?itemName={itemName}&quality=5&particle={particle}'
+    url = f'https://next.backpack.tf/classifieds?itemName={itemName}&quality=5&particle={particle}'
+    if "Strange" in itemName:
+        url += '&elevatedQuality=11'
+        url = url.replace("Strange%20%20",'')
+    return url
 
 def getUnusualIndex(itemName):
     unusualMap = UnusualToCodeMode()
-    for key, value in unusualMap.map.keys():
+    for key, value in unusualMap.map.items():
         if key in itemName:
-            return [key,value]
+            return [itemName.replace(key,''),value]
     return []
 
 def getItemPrice(item_name, particle):
