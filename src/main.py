@@ -32,6 +32,10 @@ def checkIfItemMatch(itemList, priceList, emailAddress, password):
                 file_data["items"].append({"item name": itemList[index] , 
                                             "price": priceList[index]
                                         })
+                if backpacktf.getItemPrice(itemList[index], priceList[index]):
+                    itemInfo = backpacktf.getUnusualIndex(itemList[index])
+                    url = backpacktf.getLink(itemInfo[0], itemInfo[1])
+                    emailSender.sendEmail(emailAddress, password, f'{itemList} is worth buying.', url)
             file.seek(0)
             json.dump(file_data, file, indent = 2, ensure_ascii=False)
             emailSender.sendEmail(emailAddress, password, "New item on skinport!!!", itemString)
@@ -64,23 +68,22 @@ stealth(driver,
         )
 
 while True:
-    try:
-        driver.get(url)
-        #Wait 30 seconds for the browser to load before getting info
-        time.sleep(10)
-        items = driver.find_elements(By.CLASS_NAME, 'ItemPreview-commonInfo')
-        itemList, priceList=[],[]
-        for item in items:
-            itemName = item.find_element(By.CLASS_NAME, 'ItemPreview-itemName').text
-            itemPrice = item.find_element(By.CLASS_NAME, 'Tooltip-link').text
-            itemList.append(itemName)
-            priceList.append(itemPrice)
-        print("Going into checkIfItemMatch()")
-        checkIfItemMatch(itemList, priceList, emailAddress, password)
-        print("bout to go to sleep")
-        time.sleep(60)
-    except:
-        # emailSender.sendEmail(emailAddress, password, "Warning!! Monitor Has Been Terminated", "An error has taken place and the program has terminated. Please reboot as soon as possible")
-        break
+        try:
+            driver.get(url)
+            #Wait 30 seconds for the browser to load before getting info
+            time.sleep(10)
+            items = driver.find_elements(By.CLASS_NAME, 'ItemPreview-commonInfo')
+            itemList, priceList=[],[]
+            for item in items:
+                itemName = item.find_element(By.CLASS_NAME, 'ItemPreview-itemName').text
+                itemPrice = item.find_element(By.CLASS_NAME, 'Tooltip-link').text
+                itemList.append(itemName)
+                priceList.append(itemPrice)
+            print("Going into checkIfItemMatch()")
+            while True:
+                continue
+        except:
+            print("Something went wrong")
+            # emailSender.sendEmail(emailAddress, password, "Warning!! Monitor Has Been Terminated", "An error has taken place and the program has terminated. Please reboot as soon as possible") 
 
 
