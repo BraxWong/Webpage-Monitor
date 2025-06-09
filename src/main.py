@@ -1,72 +1,15 @@
-import emailSender
-import backpacktf
-import DiscordWebhook
+import JSON as j
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium_stealth import stealth
+import undetected_chromedriver as uc
 import time
-import json
-
-def checkIfItemMatch(itemList, priceList, emailAddress, password):
-    with open("database.json", "r+", encoding='utf-8') as file:
-        print("Opening the file")
-        file_data = json.load(file)
-        index = 0
-        fileWiped = False
-        itemString = ""
-        for item in file_data["items"]:
-            if item["item name"] != itemList[index]:
-                print("New item spotted. Clearing the database")
-                itemString = itemList[index] + " " + str(priceList[index])
-                if index==0:
-                    file_data["items"].clear()
-                    file.seek(0)
-                    file.truncate()
-                    json.dump(file_data, file, indent = 2, ensure_ascii=False)
-                    fileWiped = True
-                    break
-            index +=1
-
-        if fileWiped:
-            print("Adding item to the database")
-            for index in range(len(itemList)):
-                file_data["items"].append({"item name": itemList[index] , 
-                                            "price": priceList[index]
-                                        })
-                if backpacktf.getItemPrice(itemList[index], priceList[index]):
-                    itemInfo = backpacktf.getUnusualIndex(itemList[index])
-                    url = backpacktf.getLink(itemInfo[0], itemInfo[1])
-                    emailSender.sendEmail(emailAddress, password, f'{itemList} is worth buying.', url)
-            file.seek(0)
-            json.dump(file_data, file, indent = 2, ensure_ascii=False)
-            emailSender.sendEmail(emailAddress, password, "New item on skinport!!!", itemString)
-            
-        file.truncate()
-        file.close()
-
-emailAddress = input("Please input your email address: ")
-password = input("Please input your password: ")
 
 
-options = webdriver.ChromeOptions()
-options.add_argument('start-maximized')
-options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36")
-options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
-options.add_experimental_option("excludeSwitches", ["enable-automation"])
-options.add_experimental_option('useAutomationExtension', False)
-options.binary_location = r"chromedriver"
-options.headless = True
 url = 'https://skinport.com/tf2/market?quality=12&sort=date&order=desc'
-driver = webdriver.Chrome(options=options)
-stealth(driver,
-        languages=["en-US", "en"],
-        vendor="Google Inc.",
-        platform="Win32",
-        webgl_vendor="Intel Inc.",
-        renderer="Intel Iris OpenGL Engine",
-        fix_hairline=True,
-        run_on_insecure_origins= False
-        )
+options = uc.ChromeOptions()
+options.headless = False 
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
+driver = uc.Chrome(options=options)
 
 while True:
         try:
@@ -74,15 +17,16 @@ while True:
             #Wait 30 seconds for the browser to load before getting info
             time.sleep(10)
             items = driver.find_elements(By.CLASS_NAME, 'ItemPreview-commonInfo')
-            itemList, priceList=[],[]
+            itemList, priceList, item_link_list =[],[],[]
             for item in items:
                 itemName = item.find_element(By.CLASS_NAME, 'ItemPreview-itemName').text
                 itemPrice = item.find_element(By.CLASS_NAME, 'Tooltip-link').text
+                item_link = "https://skinport.com/" + item.find_element(By.CLASS_NAME, 'ItemPreview-link').get_attribute("href")
                 itemList.append(itemName)
                 priceList.append(itemPrice)
-            print("Going into checkIfItemMatch()")
+                item_link_list.append(item_link)
+            j.check_database(["ITEM1", "ITEM2"],[13, 14],["URL1", "URL2"])
             while True:
                 continue
         except:
             print("Something went wrong")
-            # emailSender.sendEmail(emailAddress, password, "Warning!! Monitor Has Been Terminated", "An error has taken place and the program has terminated. Please reboot as soon as possible") 

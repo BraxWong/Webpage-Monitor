@@ -1,2 +1,6 @@
 httpx
 pyinstaller
+beautifulsoup4
+selenium
+webdriver-manager
+undetected-chromedriver
