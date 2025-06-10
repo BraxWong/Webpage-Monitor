@@ -1,32 +1,39 @@
 import JSON as j
+from Selenium_Config import Selenium_Config
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import undetected_chromedriver as uc
 import time
 
+skinport_unusual_url = 'https://skinport.com/tf2/market?quality=12&sort=date&order=desc'
+skinport_key_url = 'https://skinport.com/tf2/market?cat=Tool&item=Mann+Co.+Supply+Crate+Key&sort=price&order=asc'
+skinport_seller_fee = 0.88
+item_list, price_list, item_link_list =[],[],[]
+selenium_config = Selenium_Config()
 
-url = 'https://skinport.com/tf2/market?quality=12&sort=date&order=desc'
-options = uc.ChromeOptions()
-options.headless = False 
-options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
-driver = uc.Chrome(options=options)
+def get_key_price():
+    selenium_config.driver.get(skinport_key_url)
+    time.sleep(5)
+    items = selenium_config.driver.find_elements(By.CLASS_NAME, 'ItemPreview-content')
+    return float(items[0].find_element(By.CLASS_NAME, 'Tooltip-link').text.removeprefix('£')) * skinport_seller_fee
+
+def get_unusual_items_info():
+    selenium_config.driver.get(skinport_unusual_url)
+    time.sleep(5)
+    items = selenium_config.driver.find_elements(By.CLASS_NAME, 'ItemPreview-content') 
+    for item in items:
+        item_name = item.find_element(By.CLASS_NAME, 'ItemPreview-itemName').text
+        item_price = item.find_element(By.CLASS_NAME, 'Tooltip-link').text
+        item_link = item.find_element(By.CLASS_NAME, 'ItemPreview-link').get_attribute("href")
+        item_list.append(item_name)
+        price_list.append(item_price)
+        item_link_list.append(item_link)
 
 while True:
-        try:
-            driver.get(url)
-            #Wait 30 seconds for the browser to load before getting info
-            time.sleep(10)
-            items = driver.find_elements(By.CLASS_NAME, 'ItemPreview-commonInfo')
-            itemList, priceList, item_link_list =[],[],[]
-            for item in items:
-                itemName = item.find_element(By.CLASS_NAME, 'ItemPreview-itemName').text
-                itemPrice = item.find_element(By.CLASS_NAME, 'Tooltip-link').text
-                item_link = "https://skinport.com/" + item.find_element(By.CLASS_NAME, 'ItemPreview-link').get_attribute("href")
-                itemList.append(itemName)
-                priceList.append(itemPrice)
-                item_link_list.append(item_link)
-            j.check_database(["ITEM1", "ITEM2"],[13, 14],["URL1", "URL2"])
-            while True:
-                continue
-        except:
-            print("Something went wrong")
+    try:
+        get_unusual_items_info()
+        get_key_price()
+        j.check_database(item_list, price_list, item_link_list)
+        while True:
+            continue
+    except Exception as e:
+        print(e)

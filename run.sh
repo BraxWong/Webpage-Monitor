@@ -1,3 +1,3 @@
 python -m venv ~/myenv
 source ~/myenv/bin/activate
-python src/main.py
+python src/backpacktf.py
