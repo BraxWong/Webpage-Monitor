@@ -1,44 +1,38 @@
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from Selenium_Config import Selenium_Config 
 import time
 from unusualToCodeMap import UnusualToCodeMode
 
-
-def getLink(itemName, particle):
-    itemNameList = itemName.strip().split(" ")
-    itemName = ""
-    for i in range(len(itemNameList)):
-        itemName += itemNameList[i]
-        if i != len(itemNameList) - 1:
+def getLink(item_name, particle):
+    item_name_list = item_name.strip().split(" ")
+    item_name = ""
+    for i in range(len(item_name_list)):
+        itemName += item_name_list[i]
+        if i != len(item_name_list) - 1:
             itemName += "%20"
-    url = f'https://next.backpack.tf/classifieds?itemName={itemName}&quality=5&particle={particle}'
-    if "Strange" in itemName:
+    url = f'https://next.backpack.tf/classifieds?itemName={item_name}&quality=5&particle={particle}'
+    if "Strange" in item_name:
         url += '&elevatedQuality=11'
         url = url.replace("Strange%20%20",'')
     return url
 
-def getUnusualIndex(itemName):
-    unusualMap = UnusualToCodeMode()
-    for key, value in unusualMap.map.items():
-        if key in itemName:
-            return [itemName.replace(key,''),value]
+def getUnusualIndex(item_name):
+    unusual_map = UnusualToCodeMode()
+    for key, value in unusual_map.map.items():
+        if key in item_name:
+            return [item_name.replace(key,''),value]
     return []
 
-def getItemPrice(item_name, itemPrice):
-    #selenium_config = Selenium_Config()
-    linkInfo = getUnusualIndex(item_name)
-    print(linkInfo)
-    url = getLink(linkInfo[0], linkInfo[1])
-    print(url)
-    #selenium_config.driver.get(url)
-    #Wait 30 seconds for the browser to load before getting info
-    #time.sleep(10)
-    #items = selenium_config.driver.find_element(By.CLASS_NAME, 'item__price').text
-    #if float(items) * 1.2 > float(itemPrice):
-        #return True
-    #time.sleep(10)
-    #return False
+def getItemPrice(item_name):
+    selenium_config = Selenium_Config()
+    link_info = getUnusualIndex(item_name)
+    url = getLink(link_info[0], link_info[1])
+    selenium_config.driver.get(url)
+    #Wait 10 seconds for the browser to load before getting info
+    time.sleep(10)
+    buy_orders = selenium_config.driver.find_elements(By.CLASS_NAME, 'classifieds__column')[1]
+    return buy_orders.find_element(By.CLASS_NAME, 'item__price').text.replace(' keys','') 
 
-getItemPrice(["Violent Violets Taunt: Mourning Mercs"],["13.21"])
-
+def calculate_profit(marketplace_item_price, marketplace_key_price, marketplace_seller_fee, bptf_price):
+    key_price_after_fees = marketplace_key_price * marketplace_seller_fee
+    return bptf_price * key_price_after_fees - marketplace_item_price

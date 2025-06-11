@@ -31,8 +31,8 @@ def get_unusual_items_info():
 while True:
     try:
         get_unusual_items_info()
-        get_key_price()
-        j.check_database(item_list, price_list, item_link_list)
+        key_price = get_key_price()
+        j.check_database(item_list, price_list, item_link_list, skinport_seller_fee, key_price)
         while True:
             continue
     except Exception as e:
