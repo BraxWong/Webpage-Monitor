@@ -7,9 +7,9 @@ def getLink(item_name, particle):
     item_name_list = item_name.strip().split(" ")
     item_name = ""
     for i in range(len(item_name_list)):
-        itemName += item_name_list[i]
+        item_name += item_name_list[i]
         if i != len(item_name_list) - 1:
-            itemName += "%20"
+            item_name += "%20"
     url = f'https://next.backpack.tf/classifieds?itemName={item_name}&quality=5&particle={particle}'
     if "Strange" in item_name:
         url += '&elevatedQuality=11'
@@ -29,10 +29,19 @@ def getItemPrice(item_name):
     url = getLink(link_info[0], link_info[1])
     selenium_config.driver.get(url)
     #Wait 10 seconds for the browser to load before getting info
-    time.sleep(10)
+    time.sleep(5)
     buy_orders = selenium_config.driver.find_elements(By.CLASS_NAME, 'classifieds__column')[1]
-    return buy_orders.find_element(By.CLASS_NAME, 'item__price').text.replace(' keys','') 
+    listings = buy_orders.find_elements(By.CLASS_NAME, "listing")
+    if "Taunt: " in item_name:
+        item_name = item_name.replace("Taunt: ", "")
+    for listing in listings:
+        listing_item_name = listing.find_element(By.CLASS_NAME, 'listing__details__header')
+        print(listing_item_name.text)
+        if listing_item_name.text == item_name:
+            return listing.find_element(By.CLASS_NAME, 'item__price').text.replace(' keys','')
+    return ''
 
 def calculate_profit(marketplace_item_price, marketplace_key_price, marketplace_seller_fee, bptf_price):
-    key_price_after_fees = marketplace_key_price * marketplace_seller_fee
+    key_price_after_fees = marketplace_key_price - (marketplace_key_price * marketplace_seller_fee)
+    print(f"Profit: {bptf_price * key_price_after_fees - marketplace_item_price}")
     return bptf_price * key_price_after_fees - marketplace_item_price
