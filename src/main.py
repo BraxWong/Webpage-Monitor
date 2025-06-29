@@ -3,13 +3,12 @@ from Selenium_Config import Selenium_Config
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
-import subprocess
 
 skinport_unusual_url = 'https://skinport.com/tf2/market?quality=12&sort=date&order=desc'
 skinport_key_url = 'https://skinport.com/tf2/market?cat=Tool&item=Mann+Co.+Supply+Crate+Key&sort=price&order=asc'
 skinport_seller_fee = 0.88
 item_list, price_list, item_link_list =[],[],[]
-#selenium_config = Selenium_Config()
+selenium_config = Selenium_Config()
 
 def get_key_price():
     selenium_config.driver.get(skinport_key_url)
