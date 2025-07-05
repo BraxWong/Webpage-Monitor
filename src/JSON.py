@@ -3,6 +3,7 @@ import os
 import subprocess
 import backpacktf
 from sys import platform
+from Enum import Site_Classifications
 
 def add_to_json(item_list, price_list, item_link_list, f, file_data, marketplace_seller_fee, marketplace_key_price):
     for index in range(len(item_list)):
@@ -25,13 +26,19 @@ def add_to_json(item_list, price_list, item_link_list, f, file_data, marketplace
     f.seek(0)
     json.dump(file_data, f, indent = 2, ensure_ascii=False)
 
-def check_database(item_list, price_list, item_link_list, marketplace_seller_fee, marketplace_key_price):
-    if not os.path.exists("database.json"):
-        with open("database.json","w",encoding='utf-8') as file:
+def check_database(item_list, price_list, item_link_list, marketplace_seller_fee, marketplace_key_price, site_classification):
+    file_name = ""
+    if site_classification == Site_Classifications.SKINPORT:
+        file_name = "skinport_database.json"
+    else:
+        file_name = "mannco_database.json"
+
+    if not os.path.exists(file_name):
+        with open(file_name,"w",encoding='utf-8') as file:
             file.write("{\n\t\"items\":[\n\t]\n}")
             file.close()
 
-    with open("database.json", 'r+', encoding='utf-8') as file:
+    with open(file_name, 'r+', encoding='utf-8') as file:
         index = 0
         fileWiped = False
         file_data = json.load(file)

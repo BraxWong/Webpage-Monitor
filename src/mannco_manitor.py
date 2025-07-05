@@ -2,6 +2,7 @@ import JSON as j
 from Selenium_Config import Selenium_Config
 from selenium.webdriver.common.by import By
 import time
+from Enum import Site_Classifications
 
 mannco_unusual_url = 'https://mannco.store/tf2?&quality=Unusual&page=1&age=DESC'
 mannco_key_url = 'https://mannco.store/item/440-mann-co-supply-crate-key'
@@ -35,9 +36,11 @@ def get_unusual_items_info():
         item_link = unusual_effect.replace('\'','')
         item_link_list.append(f"https://mannco.store/item/440-{item_link}")
 
-while True:
-    try:
-        get_key_price()
-        get_unusual_items_info()
-    except Exception as e:
-        print(f"Error message: {e}")
+def run():
+    while True:
+        try:
+            key_price = get_key_price()
+            get_unusual_items_info()
+            j.check_database(item_list, price_list, item_link_list, mannco_seller_fee, key_price, Site_Classifications.MANNCO)
+        except Exception as e:
+            print(f"Mannco Error message: {e}")
