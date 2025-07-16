@@ -3,7 +3,9 @@ from Selenium_Config import Selenium_Config
 import time
 from unusualToCodeMap import UnusualToCodeMode
 
+
 def getLink(item_name, particle):
+    print(item_name)
     item_name_list = item_name.strip().split(" ")
     item_name = ""
     for i in range(len(item_name_list)):
@@ -27,9 +29,10 @@ def getItemPrice(item_name):
     selenium_config = Selenium_Config()
     link_info = getUnusualIndex(item_name)
     url = getLink(link_info[0], link_info[1])
+    print(url)
     selenium_config.driver.get(url)
     #Wait 10 seconds for the browser to load before getting info
-    time.sleep(5)
+    time.sleep(8)
     buy_orders = selenium_config.driver.find_elements(By.CLASS_NAME, 'classifieds__column')[1]
     listings = buy_orders.find_elements(By.CLASS_NAME, "listing")
     if "Taunt: " in item_name:
@@ -42,6 +45,5 @@ def getItemPrice(item_name):
     return ''
 
 def calculate_profit(marketplace_item_price, marketplace_key_price, marketplace_seller_fee, bptf_price):
-    key_price_after_fees = marketplace_key_price - (marketplace_key_price * marketplace_seller_fee)
-    print(f"Profit: {bptf_price * key_price_after_fees - marketplace_item_price}")
+    key_price_after_fees = marketplace_key_price * marketplace_seller_fee
     return bptf_price * key_price_after_fees - marketplace_item_price

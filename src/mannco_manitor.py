@@ -22,25 +22,24 @@ def get_unusual_items_info():
     items = selenium_config.driver.find_elements(By.CLASS_NAME, 'item-info')
     for item in items:
         unusual_effect = item.find_element(By.CLASS_NAME, "item-name").text.removeprefix('★ ').replace('\n','')
-        if "Uncraftable" in unusual_effect or '(':
-            continue
-        hat_name = item.find_element(By.CLASS_NAME, 'item-name-description').text.replace("Unusual",'')
-        price = item.find_element(By.CLASS_NAME, 'item-price').text.removeprefix('$ ')
-        item_list.append(unusual_effect.replace(hat_name,'') + hat_name)
-        price_list.append(price)
-        unusual_effect = unusual_effect.replace(hat_name,'')
-        unusual_effect = unusual_effect.replace(' ', '-')
-        unusual_effect = unusual_effect.replace('Unusual','-Unusual')
-        unusual_effect += hat_name.replace(' ','-')
-        unusual_effect = unusual_effect.replace(':','')
-        item_link = unusual_effect.replace('\'','')
-        item_link_list.append(f"https://mannco.store/item/440-{item_link}")
+        if "Uncraftable" not in unusual_effect or '(' not in unusual_effect:
+            hat_name = item.find_element(By.CLASS_NAME, 'item-name-description').text.replace("Unusual",'')
+            price = item.find_element(By.CLASS_NAME, 'item-price').text.removeprefix('$ ')
+            item_list.append(unusual_effect.replace(hat_name,'').replace("Unusual",'') + hat_name)
+            price_list.append(price)
+            unusual_effect = unusual_effect.replace(hat_name,'').replace(' ','-').replace('Unusual','-Unusual')
+            unusual_effect += hat_name.replace(' ','-')
+            unusual_effect = unusual_effect.replace(':','').replace('\'','')
+            item_link_list.append(f"https://mannco.store/item/440-{unusual_effect}")
 
 def run():
     while True:
         try:
-            key_price = get_key_price()
+            # key_price = get_key_price()
             get_unusual_items_info()
-            j.check_database(item_list, price_list, item_link_list, mannco_seller_fee, key_price, Site_Classifications.MANNCO)
+            j.check_database(item_list, price_list, item_link_list, mannco_seller_fee, 1.77, Site_Classifications.MANNCO)
         except Exception as e:
             print(f"Mannco Error message: {e}")
+
+
+run()
