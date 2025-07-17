@@ -5,7 +5,6 @@ from unusualToCodeMap import UnusualToCodeMode
 
 
 def getLink(item_name, particle):
-    print(item_name)
     item_name_list = item_name.strip().split(" ")
     item_name = ""
     for i in range(len(item_name_list)):
@@ -28,20 +27,22 @@ def getUnusualIndex(item_name):
 def getItemPrice(item_name):
     selenium_config = Selenium_Config()
     link_info = getUnusualIndex(item_name)
-    url = getLink(link_info[0], link_info[1])
-    print(url)
-    selenium_config.driver.get(url)
-    #Wait 10 seconds for the browser to load before getting info
-    time.sleep(8)
-    buy_orders = selenium_config.driver.find_elements(By.CLASS_NAME, 'classifieds__column')[1]
-    listings = buy_orders.find_elements(By.CLASS_NAME, "listing")
-    if "Taunt: " in item_name:
-        item_name = item_name.replace("Taunt: ", "")
-    for listing in listings:
-        listing_item_name = listing.find_element(By.CLASS_NAME, 'listing__details__header')
-        print(listing_item_name.text)
-        if listing_item_name.text == item_name:
-            return listing.find_element(By.CLASS_NAME, 'item__price').text.replace(' keys','')
+    if len(link_info) >= 2:
+        url = getLink(link_info[0], link_info[1])
+        selenium_config.driver.get(url)
+        #Wait 10 seconds for the browser to load before getting info
+        time.sleep(8)
+        buy_orders = selenium_config.driver.find_elements(By.CLASS_NAME, 'classifieds__column')[1]
+        listings = buy_orders.find_elements(By.CLASS_NAME, "listing")
+        if "Taunt: " in item_name:
+            item_name = item_name.replace("Taunt: ", "")
+        for listing in listings:
+            listing_item_name = listing.find_element(By.CLASS_NAME, 'listing__details__header')
+            if listing_item_name.text == item_name:
+                element = listing.find_element(By.CLASS_NAME, 'item__price').text.replace(' keys','')
+                selenium_config.quit_session()
+                return element
+        selenium_config.quit_session()
     return ''
 
 def calculate_profit(marketplace_item_price, marketplace_key_price, marketplace_seller_fee, bptf_price):
