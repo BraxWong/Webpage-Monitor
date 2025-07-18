@@ -40,6 +40,8 @@ def getItemPrice(item_name):
             listing_item_name = listing.find_element(By.CLASS_NAME, 'listing__details__header')
             if listing_item_name.text == item_name:
                 element = listing.find_element(By.CLASS_NAME, 'item__price').text.replace(' keys','')
+                if "ref" in element:
+                    element = ''
                 selenium_config.quit_session()
                 return element
         selenium_config.quit_session()
@@ -47,4 +49,5 @@ def getItemPrice(item_name):
 
 def calculate_profit(marketplace_item_price, marketplace_key_price, marketplace_seller_fee, bptf_price):
     key_price_after_fees = marketplace_key_price * marketplace_seller_fee
+    print(f"Backpack.tf Price: {bptf_price * key_price_after_fees}\nMarketplace Price: {marketplace_item_price}\nProfit: {bptf_price * key_price_after_fees - marketplace_item_price}\n")
     return bptf_price * key_price_after_fees - marketplace_item_price

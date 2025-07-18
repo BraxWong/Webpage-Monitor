@@ -33,6 +33,7 @@ def run():
         try:
             get_unusual_items_info()
             key_price = get_key_price()
+            selenium_config.quit_session()
             j.check_database(item_list, price_list, item_link_list, skinport_seller_fee, key_price,Site_Classifications.SKINPORT)
         except Exception as e:
             print(f"Skinport Error Message: {e}")

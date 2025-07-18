@@ -48,5 +48,3 @@ def run():
             else:
                 subprocess.run(f'cd src && .\\DiscordWebhook.exe "{e}"')
             break
-
-run()

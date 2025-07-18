@@ -1,9 +1,11 @@
 import json
 import os
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 import backpacktf
 from sys import platform
 from Enum import Site_Classifications
+import mouse_movement
 
 temp_map = {}
 
@@ -12,7 +14,10 @@ def load_database_to_map(file_data):
         temp_map[item["item name"]] = item["price"]
 
 def check_profitability(item_name, price, url, marketplace_key_price, marketplace_seller_fee):
-    buy_order_price = backpacktf.getItemPrice(item_name)
+    print(f"Item Name: {item_name}")
+    future1 = ThreadPoolExecutor().submit(backpacktf.getItemPrice, item_name)
+    future2 = ThreadPoolExecutor().submit(mouse_movement.jiggle_mouse)
+    buy_order_price = future1.result()
     if buy_order_price != '':
         link_info = backpacktf.getUnusualIndex(item_name)
         if len(link_info) >= 2:
@@ -27,7 +32,6 @@ def check_profitability(item_name, price, url, marketplace_key_price, marketplac
 
 def add_to_json(item_list, price_list, item_link_list, f, file_data, marketplace_seller_fee, marketplace_key_price):
     for index in range(len(item_list)):
-        print(f"{item_list[index]}")
         file_data["items"].append({"item name": item_list[index], 
                                     "price": price_list[index],
                                     "url": item_link_list[index]})
@@ -49,9 +53,9 @@ def edit_to_json(item_name, price, f, file_data, item_link, marketplace_key_pric
 def get_database_file_name(site_classification):
     file_name = ""
     if site_classification == Site_Classifications.SKINPORT:
-        file_name = "skinport_database.json"
+        file_name = "src/skinport_database.json"
     else:
-        file_name = "mannco_database.json"
+        file_name = "src/mannco_database.json"
     return file_name
 
 def check_database(item_list, price_list, item_link_list, marketplace_seller_fee, marketplace_key_price, site_classification):
@@ -72,10 +76,8 @@ def check_database(item_list, price_list, item_link_list, marketplace_seller_fee
             load_database_to_map(file_data)
             for i in range(len(item_list)): 
                 if item_list[i] in temp_map and temp_map[item_list[i]] != price_list[i]:
-                    print("Found item but price is not updated")
                     edit_to_json(item_list[i], price_list[i], file, file_data, item_link_list[i], marketplace_key_price, marketplace_seller_fee)
                 elif item_list[i] not in temp_map:
-                    print("Item not in the map / database")
                     add_to_json([item_list[i]], [price_list[i]], [item_link_list[i]], file, file_data, marketplace_seller_fee, marketplace_key_price)
         file.truncate()
         file.close()
