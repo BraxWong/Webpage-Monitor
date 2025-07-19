@@ -1,2 +1,3 @@
 src/DiscordWebhook.py
-database.json
+src/mannco_database.json
+src/skinport_database.json

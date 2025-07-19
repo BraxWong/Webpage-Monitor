@@ -24,8 +24,7 @@ def getUnusualIndex(item_name):
             return [item_name.replace(key,''),value]
     return []
 
-def getItemPrice(item_name):
-    selenium_config = Selenium_Config()
+def getItemPrice(item_name,selenium_config):
     link_info = getUnusualIndex(item_name)
     if len(link_info) >= 2:
         url = getLink(link_info[0], link_info[1])
