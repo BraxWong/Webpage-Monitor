@@ -1,6 +1,8 @@
 import JSON as j
 from selenium.webdriver.common.by import By
 import time
+import subprocess
+from sys import platform
 from Enum import Site_Classifications
 import Selenium_Config
 
@@ -37,5 +39,9 @@ def run(selenium_config):
         j.check_database(item_list, price_list, item_link_list, skinport_info.skinport_seller_fee, key_price,Site_Classifications.SKINPORT, selenium_config)
     except Exception as e:
         print(f"Skinport Error Message: {e}")
+        if platform == "linux":
+            subprocess.run(f'cd src && ./DiscordWebhook "{e}"')
+        else:
+            subprocess.run(f'cd src && .\\DiscordWebhook.exe "{e}"')
 
 run(Selenium_Config.Selenium_Config())

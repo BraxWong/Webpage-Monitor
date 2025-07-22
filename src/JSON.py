@@ -7,15 +7,16 @@ from sys import platform
 from Enum import Site_Classifications
 import mouse_movement
 
-temp_map = {}
+database_map = {}
 
 def load_database_to_map(file_data):
     for item in file_data["items"]:
-        temp_map[item["item name"]] = item["price"]
+        database_map[item["item name"]] = item["price"]
 
 def check_profitability(item_name, price, url, marketplace_key_price, marketplace_seller_fee, selenium_config):
     print(f"Item Name: {item_name}")
     future1 = ThreadPoolExecutor().submit(backpacktf.getItemPrice, item_name, selenium_config)
+    # The following is optional depending on the user's use case
     # future2 = ThreadPoolExecutor().submit(mouse_movement.jiggle_mouse)
     buy_order_price = future1.result()
     if buy_order_price != '':
@@ -80,9 +81,9 @@ def check_database(item_list, price_list, item_link_list, marketplace_seller_fee
         else:
             load_database_to_map(file_data)
             for i in range(len(item_list)): 
-                if item_list[i] in temp_map and temp_map[item_list[i]] != price_list[i]:
+                if item_list[i] in database_map and database_map[item_list[i]] != price_list[i]:
                     edit_to_json(item_list[i], price_list[i], file, file_data, item_link_list[i], marketplace_key_price, marketplace_seller_fee, selenium_config)
-                elif item_list[i] not in temp_map:
+                elif item_list[i] not in database_map:
                     add_to_json([item_list[i]], [price_list[i]], [item_link_list[i]], file, file_data, marketplace_seller_fee, marketplace_key_price, selenium_config)
         file.truncate()
         file.close()
